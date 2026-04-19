@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site CMS</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Auth Screen */
+    .auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .auth-box h1 {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .auth-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .auth-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .auth-box button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .auth-box button:hover {
+      background: var(--accent-hover);
+    }
+
+    .auth-error {
+      color: #ef4444;
+      font-size: 0.875rem;
+      text-align: center;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    /* Main App */
+    .app {
+      display: none;
+      height: 100vh;
+    }
+
+    .app.visible {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-screen.hidden {
+      display: none;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .site-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .status-badges {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .badge-dot.pending {
+      background: var(--warning);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .tab {
+      padding: 0.875rem 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.active {
+      color: var(--text);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* Chat Area */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 0.875rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.system {
+      align-self: center;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      padding: 0.5rem;
+    }
+
+    .message pre {
+      background: var(--bg);
+      padding: 0.75rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .message code {
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    /* Input Area */
+    .input-area {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .input-area textarea {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      resize: none;
+      min-height: 44px;
+      max-height: 200px;
+    }
+
+    .input-area textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .input-area button {
+      padding: 0 1.25rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .input-area button:hover {
+      background: var(--accent-hover);
+    }
+
+    .input-area button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Deploy Bar */
+    .deploy-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .deploy-info {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .deploy-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .deploy-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .deploy-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-muted);
+    }
+
+    .deploy-btn.primary {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .deploy-btn.primary:hover {
+      background: #16a34a;
+    }
+
+    /* Placeholder content */
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .placeholder-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .placeholder h2 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .placeholder p {
+      font-size: 0.875rem;
+      max-width: 300px;
+    }
+
+    /* Tab content */
+    .tab-content {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Screen -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-box">
+      <h1>🔐 Site CMS</h1>
+      <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+      <button onclick="authenticate()">Enter</button>
+      <div class="auth-error" id="authError">Incorrect password</div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="app">
+    <header>
+      <div class="site-name" id="siteName">wa-test-site</div>
+      <div class="status-badges">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Staging
+        </div>
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Production
+        </div>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="edits">Web Edits</button>
+      <button class="tab" data-tab="posts">Posts</button>
+    </div>
+
+    <!-- Web Edits Tab -->
+    <div class="tab-content active" id="edits-tab">
+      <div class="chat-container">
+        <div class="messages" id="editsMessages">
+          <div class="message system">
+            Ask me to make changes to the site. For example: "Add a new service called Consulting" or "Change the hero headline to Welcome Home"
+          </div>
+        </div>
+      </div>
+      <div class="input-area">
+        <div class="input-row">
+          <textarea id="editsInput" placeholder="Describe the change you want to make..." rows="1" onkeydown="handleKeydown(event, 'edits')"></textarea>
+          <button onclick="sendMessage('edits')">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Tab -->
+    <div class="tab-content" id="posts-tab">
+      <div class="chat-container">
+        <div class="messages" id="postsMessages">
+          <div class="message system">
+            Create blog posts or news articles. For example: "Write a post about our new partnership with XYZ" or "Draft an announcement for the upcoming event"
+          </div>
+        </div>
+      </div>
+      <div class="input-area">
+        <div class="input-row">
+          <textarea id="postsInput" placeholder="Describe the post you want to create..." rows="1" onkeydown="handleKeydown(event, 'posts')"></textarea>
+          <button onclick="sendMessage('posts')">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="deploy-bar">
+      <div class="deploy-info">
+        Last deployed: <span id="lastDeploy">Just now</span>
+      </div>
+      <div class="deploy-actions">
+        <button class="deploy-btn" onclick="viewStaging()">View Staging</button>
+        <button class="deploy-btn primary" onclick="promoteToProduction()">Promote to Production</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Config - these would be set per-site
+    const CONFIG = {
+      password: 'demo123',  // Change this per client
+      siteName: 'wa-test-site',
+      stagingUrl: 'https://wa-test-site.vercel.app',
+      productionUrl: 'https://wa-test-site.vercel.app',
+      apiEndpoint: '/api/chat'  // Future: connect to actual backend
+    };
+
+    // Auth
+    function authenticate() {
+      const input = document.getElementById('passwordInput');
+      const error = document.getElementById('authError');
+      
+      if (input.value === CONFIG.password) {
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('app').classList.add('visible');
+        document.getElementById('siteName').textContent = CONFIG.siteName;
+      } else {
+        error.style.display = 'block';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') authenticate();
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+      });
+    });
+
+    // Chat
+    function handleKeydown(e, type) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(type);
+      }
+    }
+
+    function sendMessage(type) {
+      const input = document.getElementById(`${type}Input`);
+      const messages = document.getElementById(`${type}Messages`);
+      const text = input.value.trim();
+      
+      if (!text) return;
+
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.textContent = text;
+      messages.appendChild(userMsg);
+
+      input.value = '';
+      messages.scrollTop = messages.scrollHeight;
+
+      // Simulate response (replace with actual API call)
+      setTimeout(() => {
+        const assistantMsg = document.createElement('div');
+        assistantMsg.className = 'message assistant';
+        
+        if (type === 'edits') {
+          assistantMsg.innerHTML = `I'll make that change for you. Here's what I'm updating:<pre><code>${escapeHtml(text)}</code></pre>Deploying to staging now...`;
+        } else {
+          assistantMsg.innerHTML = `I'll draft that post for you. Give me a moment to write it up and add it to the site.`;
+        }
+        
+        messages.appendChild(assistantMsg);
+        messages.scrollTop = messages.scrollHeight;
+
+        // Simulate deploy
+        setTimeout(() => {
+          const systemMsg = document.createElement('div');
+          systemMsg.className = 'message system';
+          systemMsg.textContent = '✓ Changes deployed to staging';
+          messages.appendChild(systemMsg);
+          messages.scrollTop = messages.scrollHeight;
+          document.getElementById('lastDeploy').textContent = 'Just now';
+        }, 2000);
+      }, 1000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Deploy actions
+    function viewStaging() {
+      window.open(CONFIG.stagingUrl, '_blank');
+    }
+
+    function promoteToProduction() {
+      if (confirm('Promote current staging to production?')) {
+        const systemMsg = document.createElement('div');
+        systemMsg.className = 'message system';
+        systemMsg.textContent = '🚀 Promoting to production...';
+        
+        const activeTab = document.querySelector('.tab.active').dataset.tab;
+        document.getElementById(`${activeTab}Messages`).appendChild(systemMsg);
+
+        setTimeout(() => {
+          systemMsg.textContent = '✓ Live on production!';
+        }, 2000);
+      }
+    }
+
+    // Auto-resize textarea
+    document.querySelectorAll('textarea').forEach(textarea => {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+      });
+    });
+  </script>
+</body>
+</html>
