@@ -516,7 +516,7 @@
       }
     }
 
-    function sendMessage(type) {
+    async function sendMessage(type) {
       const input = document.getElementById(`${type}Input`);
       const messages = document.getElementById(`${type}Messages`);
       const text = input.value.trim();
