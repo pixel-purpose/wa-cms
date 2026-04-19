@@ -1,0 +1,14 @@
+{
+  "id": "req_1776616473519_0w0x4pa81",
+  "message": "Change the hero headline to Welcome to Modern Wolf",
+  "type": "edits",
+  "site": "wa-test-site",
+  "status": "completed",
+  "createdAt": "2026-04-19T16:34:33.519Z",
+  "completedAt": "2026-04-19T16:36:00.000Z",
+  "result": {
+    "message": "Changed hero headline from 'Modern Meets Monster' to 'Welcome to Modern Wolf'",
+    "changes": ["Updated h1.hero__title text"],
+    "commitSha": "ba27188"
+  }
+}
