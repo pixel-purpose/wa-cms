@@ -1,0 +1,17 @@
+{
+  "id": "req_1776617129124_q0no1q9je",
+  "message": "change the location back to martinsburg, wv",
+  "type": "edits",
+  "site": "wa-test-site",
+  "status": "completed",
+  "createdAt": "2026-04-19T16:45:29.124Z",
+  "completedAt": "2026-04-19T16:46:00.000Z",
+  "result": {
+    "message": "Changed location from 'Oahu, HI' back to 'Martinsburg, WV'",
+    "changes": [
+      "Updated hero pill text",
+      "Updated hero description"
+    ],
+    "commitSha": "d0bdfac"
+  }
+}
