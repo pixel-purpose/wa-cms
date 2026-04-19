@@ -473,8 +473,7 @@
       password: 'demo123',  // Change this per client
       siteName: 'wa-test-site',
       stagingUrl: 'https://wa-test-site.vercel.app',
-      productionUrl: 'https://wa-test-site.vercel.app',
-      apiEndpoint: '/api/chat'  // Future: connect to actual backend
+      productionUrl: 'https://wa-test-site-production.vercel.app'
     };
 
     // Auth
@@ -608,18 +607,38 @@
       window.open(CONFIG.stagingUrl, '_blank');
     }
 
-    function promoteToProduction() {
-      if (confirm('Promote current staging to production?')) {
-        const systemMsg = document.createElement('div');
-        systemMsg.className = 'message system';
-        systemMsg.textContent = '🚀 Promoting to production...';
-        
-        const activeTab = document.querySelector('.tab.active').dataset.tab;
-        document.getElementById(`${activeTab}Messages`).appendChild(systemMsg);
+    function viewProduction() {
+      window.open(CONFIG.productionUrl, '_blank');
+    }
 
-        setTimeout(() => {
+    async function promoteToProduction() {
+      if (!confirm('Promote current staging to production?')) return;
+
+      const activeTab = document.querySelector('.tab.active').dataset.tab;
+      const messages = document.getElementById(`${activeTab}Messages`);
+      
+      const systemMsg = document.createElement('div');
+      systemMsg.className = 'message system';
+      systemMsg.textContent = '🚀 Promoting to production...';
+      messages.appendChild(systemMsg);
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const response = await fetch('/api/promote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ site: CONFIG.siteName })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
           systemMsg.textContent = '✓ Live on production!';
-        }, 2000);
+        } else {
+          systemMsg.textContent = `⚠️ ${result.error || 'Promotion failed'}`;
+        }
+      } catch (error) {
+        systemMsg.textContent = `⚠️ Error: ${error.message}`;
       }
     }
 
