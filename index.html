@@ -532,30 +532,69 @@
       input.value = '';
       messages.scrollTop = messages.scrollHeight;
 
-      // Simulate response (replace with actual API call)
-      setTimeout(() => {
-        const assistantMsg = document.createElement('div');
-        assistantMsg.className = 'message assistant';
-        
-        if (type === 'edits') {
-          assistantMsg.innerHTML = `I'll make that change for you. Here's what I'm updating:<pre><code>${escapeHtml(text)}</code></pre>Deploying to staging now...`;
-        } else {
-          assistantMsg.innerHTML = `I'll draft that post for you. Give me a moment to write it up and add it to the site.`;
-        }
-        
-        messages.appendChild(assistantMsg);
-        messages.scrollTop = messages.scrollHeight;
+      // Show thinking indicator
+      const thinkingMsg = document.createElement('div');
+      thinkingMsg.className = 'message assistant';
+      thinkingMsg.innerHTML = '<em>Thinking...</em>';
+      messages.appendChild(thinkingMsg);
+      messages.scrollTop = messages.scrollHeight;
 
-        // Simulate deploy
-        setTimeout(() => {
-          const systemMsg = document.createElement('div');
-          systemMsg.className = 'message system';
-          systemMsg.textContent = '✓ Changes deployed to staging';
-          messages.appendChild(systemMsg);
-          messages.scrollTop = messages.scrollHeight;
-          document.getElementById('lastDeploy').textContent = 'Just now';
-        }, 2000);
-      }, 1000);
+      try {
+        // Queue the request
+        const queueResponse = await fetch('/api/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, type, site: CONFIG.siteName })
+        });
+
+        const queueResult = await queueResponse.json();
+
+        if (!queueResult.success) {
+          thinkingMsg.innerHTML = `⚠️ ${escapeHtml(queueResult.error || 'Failed to queue request')}`;
+          return;
+        }
+
+        thinkingMsg.innerHTML = `<em>Request queued. Processing...</em>`;
+
+        // Poll for completion
+        const requestId = queueResult.requestId;
+        let attempts = 0;
+        const maxAttempts = 60; // 2 minutes max
+
+        const pollInterval = setInterval(async () => {
+          attempts++;
+          
+          try {
+            const statusResponse = await fetch(`/api/request?id=${requestId}`);
+            const status = await statusResponse.json();
+
+            if (status.status === 'completed') {
+              clearInterval(pollInterval);
+              thinkingMsg.innerHTML = `${escapeHtml(status.result?.message || 'Changes applied')}<pre><code>${status.result?.changes?.map(c => '• ' + c).join('\n') || '✓ Done'}</code></pre>`;
+              
+              const systemMsg = document.createElement('div');
+              systemMsg.className = 'message system';
+              systemMsg.textContent = '✓ Changes deployed to staging';
+              messages.appendChild(systemMsg);
+              document.getElementById('lastDeploy').textContent = 'Just now';
+              messages.scrollTop = messages.scrollHeight;
+            } else if (status.status === 'failed') {
+              clearInterval(pollInterval);
+              thinkingMsg.innerHTML = `⚠️ ${escapeHtml(status.error || 'Processing failed')}`;
+            } else if (attempts >= maxAttempts) {
+              clearInterval(pollInterval);
+              thinkingMsg.innerHTML = `⚠️ Request timed out. It may still be processing.`;
+            }
+          } catch (e) {
+            // Keep polling on network errors
+          }
+        }, 2000); // Poll every 2 seconds
+
+      } catch (error) {
+        thinkingMsg.innerHTML = `⚠️ Error: ${escapeHtml(error.message)}`;
+      }
+
+      messages.scrollTop = messages.scrollHeight;
     }
 
     function escapeHtml(text) {
