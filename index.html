@@ -223,8 +223,11 @@
       flex-direction: column;
       border: 1px solid var(--border);
       border-radius: 12px;
-      background: var(--bg);
+      background: rgba(10, 10, 10, 0.9);
       overflow: hidden;
+      opacity: 0.9;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .messages {
