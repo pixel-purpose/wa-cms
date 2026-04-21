@@ -1,0 +1,52 @@
+[
+  {
+    "id": "req_1776616849485_tdweyn557",
+    "message": "change the location in the hero from martinsburg, wv to oahu, hi",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-19T16:40:49.485Z",
+    "processedAt": "2026-04-19T16:51:00.000Z",
+    "note": "Processed in 2026-04-19 session"
+  },
+  {
+    "id": "req_1776617129124_q0no1q9je",
+    "message": "change the location back to martinsburg, wv",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-19T16:45:29.124Z",
+    "processedAt": "2026-04-19T16:51:00.000Z",
+    "note": "Processed in 2026-04-19 session"
+  },
+  {
+    "id": "req_1776781030293_z1c5c65uz",
+    "message": "change the hero text to website automation",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-21T14:17:10.293Z",
+    "processedAt": "2026-04-21T14:28:00.000Z",
+    "note": "Duplicate of req_1776781522551 — same edit, cleared together"
+  },
+  {
+    "id": "req_1776781047512_633d5hm82",
+    "message": "change the hero to website automation",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-21T14:17:27.513Z",
+    "processedAt": "2026-04-21T14:28:00.000Z",
+    "note": "Duplicate — same edit, cleared together"
+  },
+  {
+    "id": "req_1776781522551_drzo40ol5",
+    "message": "change the hero text to say website automation",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-21T14:25:22.551Z",
+    "processedAt": "2026-04-21T14:28:00.000Z",
+    "note": "Applied: hero h1 changed to 'Website Automation'"
+  }
+]
