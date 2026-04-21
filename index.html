@@ -441,6 +441,8 @@
       display: flex;
     }
   </style>
+  <script src='https://code.createjs.com/easeljs-0.7.1.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js'></script>
 </head>
 <body>
   <!-- Auth Screen -->
@@ -738,33 +740,31 @@
       }
     }
 
-    // Ambient background animation
-    (function initAmbient() {
-      const canvas = document.getElementById('ambient-canvas');
-      if (!canvas) return;
-
-      // Wait for EaselJS + TweenMax to load
-      function tryInit() {
-        if (typeof createjs !== 'undefined' && typeof TweenMax !== 'undefined') {
-          // Size canvas to container
-          function sizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-          }
-          sizeCanvas();
-
-          var ambientParticles = new ParticleEngine('ambient-canvas');
-          createjs.Ticker.addEventListener('tick', () => ambientParticles.render());
-          window.addEventListener('resize', () => {
-            sizeCanvas();
-            ambientParticles.resize();
-          });
-        } else {
-          setTimeout(tryInit, 100);
+    // Ambient background animation — init after layout is ready
+    var ambientParticles = null;
+    function initAmbient() {
+      var canvas = document.getElementById('ambient-canvas');
+      if (!canvas || ambientParticles) return;
+      // Use rAF to ensure the element has been painted and has real dimensions
+      requestAnimationFrame(function() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        if (canvas.width === 0 || canvas.height === 0) {
+          // Still no dimensions — retry next frame
+          setTimeout(initAmbient, 50);
+          return;
         }
-      }
-      tryInit();
-    })();
+        ambientParticles = new ParticleEngine('ambient-canvas');
+        createjs.Ticker.addEventListener('tick', function() { ambientParticles.render(); });
+        window.addEventListener('resize', function() {
+          canvas.width = canvas.offsetWidth;
+          canvas.height = canvas.offsetHeight;
+          ambientParticles.resize();
+        });
+      });
+    }
+    // Init on page load
+    window.addEventListener('load', initAmbient);
 
     // Auto-resize textarea
     document.querySelectorAll('textarea').forEach(textarea => {
@@ -774,8 +774,6 @@
       });
     });
   </script>
-  <script src='https://code.createjs.com/easeljs-0.7.1.min.js'></script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js'></script>
   <script>
 ////////////////////////// PARTICLE ENGINE ////////////////////////////////////////
 var ParticleEngine = (function() {
