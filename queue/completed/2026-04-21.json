@@ -48,5 +48,15 @@
     "createdAt": "2026-04-21T14:25:22.551Z",
     "processedAt": "2026-04-21T14:28:00.000Z",
     "note": "Applied: hero h1 changed to 'Website Automation'"
+  },
+  {
+    "id": "req_1776792350459_op39y91i2",
+    "message": "change the hero text to \"this is a test\"",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "completed",
+    "createdAt": "2026-04-21T17:25:50.461Z",
+    "processedAt": "2026-04-21T17:33:00.000Z",
+    "note": "Applied: hero h1 changed to 'this is a test'"
   }
 ]
