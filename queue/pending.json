@@ -22,5 +22,13 @@
     "site": "wa-test-site",
     "status": "pending",
     "createdAt": "2026-04-21T14:17:10.293Z"
+  },
+  {
+    "id": "req_1776781047512_633d5hm82",
+    "message": "change the hero to website automation",
+    "type": "edits",
+    "site": "wa-test-site",
+    "status": "pending",
+    "createdAt": "2026-04-21T14:17:27.513Z"
   }
 ]
