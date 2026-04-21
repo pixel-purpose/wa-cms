@@ -461,6 +461,7 @@
         Last deployed: <span id="lastDeploy">Just now</span>
       </div>
       <div class="deploy-actions">
+        <button class="deploy-btn" onclick="processQueue()" title="Immediately process pending edits">⚡ Process Now</button>
         <button class="deploy-btn" onclick="viewStaging()">View Staging</button>
         <button class="deploy-btn primary" onclick="promoteToProduction()">Promote to Production</button>
       </div>
@@ -603,6 +604,44 @@
     }
 
     // Deploy actions
+    async function processQueue() {
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = '⏳ Processing...';
+      button.disabled = true;
+
+      try {
+        const response = await fetch('/api/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          button.textContent = '✓ Triggered';
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+          }, 2000);
+        } else {
+          button.textContent = '✗ Failed';
+          console.error('Process error:', result.error);
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+          }, 2000);
+        }
+      } catch (error) {
+        button.textContent = '✗ Error';
+        console.error('Process error:', error);
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 2000);
+      }
+    }
+
     function viewStaging() {
       window.open(CONFIG.stagingUrl, '_blank');
     }
